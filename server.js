@@ -13,7 +13,11 @@ const PORT=5000;
 
 async function startServer() {
     await connectDB();
-    await redisConnect();
+    
+    const redisAvailable=await redisConnect();
+    if(!redisAvailable){
+        console.log("Starting server without redis...");
+    }
     app.listen(PORT,()=>{
         console.log(`Server is running on port ${PORT}`);
     })

@@ -5,7 +5,6 @@ async function findByShortCode(shortCode) {
     const query='SELECT original_url FROM url_by_code WHERE short_code=?';
     const params=[shortCode];
     const result = await client.execute(query, params, { prepare: true });
-    console.log('Result:',result.rows);
     return result.rows.length>0?result.rows[0].original_url:null;
 }
 
@@ -14,7 +13,6 @@ async function findByOriginalUrl(originalUrl) {
     const query='SELECT short_code FROM code_by_url WHERE original_url=?';
     const params=[originalUrl];
     const result=await client.execute(query, params, { prepare: true });
-    console.log("Result:",result.rows);
     return result.rows.length>0?result.rows[0].short_code:null;
 }
 
