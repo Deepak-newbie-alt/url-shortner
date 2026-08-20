@@ -4,6 +4,7 @@ const app=express();
 
 const urlRoutes=require("./routes/urlRoutes");
 const {errorMiddleware}=require("./middlewares/errorMiddleware");
+const {redisConnect}=require("./config/redis");
 
 app.use(express.json());
 app.use("/api/url",urlRoutes);
@@ -12,6 +13,7 @@ const PORT=5000;
 
 async function startServer() {
     await connectDB();
+    await redisConnect();
     app.listen(PORT,()=>{
         console.log(`Server is running on port ${PORT}`);
     })
