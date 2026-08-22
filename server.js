@@ -4,9 +4,13 @@ const app=express();
 
 const urlRoutes=require("./routes/urlRoutes");
 const {errorMiddleware}=require("./middlewares/errorMiddleware");
+const {requestIdMiddleware}=require("./middlewares/requestIdMiddleware");
+const {requestMetricMiddleware}=require("./middlewares/requestMetricMiddleware");
 const {redisConnect}=require("./config/redis");
 
 app.use(express.json());
+app.use(requestIdMiddleware);
+app.use(requestMetricMiddleware);
 app.use("/api/url",urlRoutes);
 
 const PORT=5000;
