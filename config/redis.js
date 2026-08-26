@@ -6,7 +6,7 @@ const redisClient = redis.createClient({
     socket: {
         reconnectStrategy: (retries) => {
 
-            return Math.min(retries * 200, 3000);
+            return Math.min(retries * 200, 2000);
         }
     }
 });
