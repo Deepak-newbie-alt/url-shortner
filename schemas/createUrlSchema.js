@@ -5,6 +5,7 @@ const createUrlSchema=z.object({
     .string()
     .trim()
     .min(1,"Url is required")
+    .max(2048,"Url is too long")
     .url("Please provide a valid url")
     .refine(
         (url)=>url.startsWith("http://")||url.startsWith("https://"),
