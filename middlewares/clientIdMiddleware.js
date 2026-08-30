@@ -8,11 +8,11 @@ const options={
 
 
 const clientIdentity=async(req,res,next)=>{
+
     let clientId=req.cookies.clientId;
 
     if(!clientId){
         clientId=crypto.randomUUID();
-
         res.cookie("clientId",clientId,options);
     }
 

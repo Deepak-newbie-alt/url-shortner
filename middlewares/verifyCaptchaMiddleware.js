@@ -1,3 +1,4 @@
+require("dotenv").config();
 const {redisClient}=require("../config/redis");
 const axios=require("axios");
 const { ApiResponse } = require("../utils/ApiResponse");
@@ -5,7 +6,7 @@ const { catchAsync } = require("../utils/catchAsync");
 const { ApiError } = require("../utils/ApiError");
 
 const verifyCaptcha=catchAsync(async(req,res,next)=>{
-    if(!req.isAbused){
+    if(!req.rateLimit?.isAbused){
         return next();
     }
 
@@ -40,14 +41,13 @@ const verifyCaptcha=catchAsync(async(req,res,next)=>{
     );
 
     if(response.data.success){
-        if(req.redisKeyToReset){
-            await redisClient.del(req.redisKeyToReset);
+        if(req.rateLimit.redisKeyToReset){
+            await redisClient.del(req.rateLimit.redisKeyToReset);
         }
 
-        if(req.violationKeyToReset){
-            await redisClient.del(req.violationKeyToReset);
+        if(req.rateLimit.violationKeyToReset){
+            await redisClient.del(req.rateLimit.violationKeyToReset);
         }
-
         return next();
     }
 
