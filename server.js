@@ -4,6 +4,7 @@ const cookieParser=require("cookie-parser")
 const app=express();
 
 const urlRoutes=require("./routes/urlRoutes");
+const userRoutes=require("./routes/userRoutes");
 const {errorMiddleware}=require("./middlewares/errorMiddleware");
 const {requestIdMiddleware}=require("./middlewares/requestIdMiddleware");
 const {requestMetricMiddleware}=require("./middlewares/requestMetricMiddleware");
@@ -14,6 +15,7 @@ app.use(cookieParser());
 app.use(requestIdMiddleware);
 app.use(requestMetricMiddleware);
 app.use("/api/url",urlRoutes);
+app.use("/api/user",userRoutes);
 
 const PORT=5000;
 

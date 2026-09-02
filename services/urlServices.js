@@ -2,16 +2,18 @@ const {nanoid}=require('nanoid');
 const {
     findByShortCode,
     findByOriginalUrl,
-    createUrl
+    createUrl,
+    deleteUrlQuery,
+    getUrlsByUser
 }=require("../repositories/urlRepository");
 
 const {ApiError}=require("../utils/ApiError");
 const { getRedisCache, setRedisCache } = require('../utils/redisHelpers');
 const { logger } = require('../observability/logger');
-const { recordTotalUrl,recordDbDuration }=require("../observability/metrics");
+const { recordTotalUrl}=require("../observability/metrics");
 const {sanitizeUrl}=require("../utils/sanitizeUrl");
 
-const generateShortUrl=async(originalUrl)=>{
+const generateShortUrl=async(userId,originalUrl)=>{
     logger.info("url_generation_started",{
         url:sanitizeUrl(originalUrl)
     })
@@ -36,7 +38,7 @@ const generateShortUrl=async(originalUrl)=>{
     }
 
     const shortCode=nanoid(7);
-    const shortUrl=await createUrl(shortCode,originalUrl);
+    const shortUrl=await createUrl(userId,shortCode,originalUrl);
     recordTotalUrl();
 
     await setRedisCache(originalUrl,shortUrl,15*60);
@@ -79,7 +81,61 @@ const getOriginalUrl=async(shortCode)=>{
     return originalUrl;
 }
 
+const deleteUrlFromDB=async(shortCode,userId)=>{
+    logger.info("delete_query_started",{
+        userId,
+        shortCode
+    });
+    const deleted=await deleteUrlQuery(shortCode,userId);
+
+    if (!deleted) {
+        logger.error("url_not_found_or_failed_ownership_check",{
+            userId,
+            shortCode,
+            status:404
+        })
+        throw new ApiError(404,"URL not found or you don't own this URL")
+    }
+
+    logger.info("deletion_query_successful",{
+        userId,
+        shortCode
+    });
+    return deleted;
+}
+
+const getUrls=async(userId)=>{
+    const cachedUrls=await getRedisCache(`urls:${userId}`);
+    if(cachedUrls){
+        logger.info("urls_fetch_cache_hit",{
+            userId,
+            count:cachedUrls.length
+        });
+        return cachedUrls;
+    }
+
+    const urls=await getUrlsByUser(userId);
+
+    if(!urls || urls.length==0){
+        logger.error("no_urls_found_for_user",{
+            userId,
+            status:404,
+            message:"No urls found for the specified user"
+        });
+
+        throw new ApiError(404,"No urls found for the specified user");
+    }
+    await setRedisCache(`urls:${userId}`,urls,15*60);
+    logger.info("urls_fetched_successfully",{
+        userId,
+        count:urls.length
+    })
+    return urls;
+}
+
 module.exports={
     generateShortUrl,
-    getOriginalUrl
+    getOriginalUrl,
+    deleteUrlFromDB,
+    getUrls
 }
