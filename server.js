@@ -17,12 +17,12 @@ app.use(requestMetricMiddleware);
 app.use("/api/url",urlRoutes);
 app.use("/api/user",userRoutes);
 
-const PORT=5000;
+const PORT=process.env.PORT || 5000;
 
 async function startServer() {
     await connectDB();
     
-    app.listen(PORT,()=>{
+    app.listen(PORT,"0.0.0.0",()=>{
         console.log(`Server is running on port ${PORT}`);
     })
     

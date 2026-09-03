@@ -2,7 +2,7 @@ const crypto=require("crypto");
 
 const options={
     httpOnly:true,
-    secure:false,
+    secure:process.env.NODE_ENV==="production",
     maxAge:1000*60*60*24
 }
 

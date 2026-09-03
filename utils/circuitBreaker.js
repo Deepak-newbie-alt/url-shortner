@@ -32,7 +32,7 @@ class CircuitBreaker{
             }catch(err){
                 this.state="OPEN";
                 this.nextAttempt=Date.now()+this.resetTimeout;
-                console.log("Circuit is opening....redis unavailable");
+                console.log("Circuit is opening....service unavailable");
                 return null;
             }finally{
                 this.halfOpenInProgress=false;

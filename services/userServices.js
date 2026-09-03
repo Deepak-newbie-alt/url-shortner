@@ -3,7 +3,7 @@ const {generateTokens}=require("../utils/generateTokens");
 
 const bcrypt=require("bcrypt");
 const {ApiResponse}=require("../utils/ApiResponse");
-const {logger}=require("../utils/logger");
+const {logger}=require("../observability/logger");
 
 const executeRegisterUser=async(email,password)=>{
     logger.info("user_registration_attempt",{

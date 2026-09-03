@@ -5,7 +5,7 @@ const {ApiResponse}=require("../utils/ApiResponse");
 
 const options={
     httpOnly:true,
-    secure:false
+    secure:process.env.NODE_ENV==="production"
 }
 
 const register=catchAsync(async(req,res)=>{

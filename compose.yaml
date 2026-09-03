@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: .
+    environment:
+      PORT: 5000
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      ASTRA_TOKEN: ${ASTRA_TOKEN}
+      SCB_PATH: /app/secure-connect-tinyurl.zip
+    volumes:
+      - "C:/Users/acer/Downloads/secure-connect-tinyurl.zip:/app/secure-connect-tinyurl.zip:ro"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}

@@ -7,7 +7,11 @@ export const options = {
 };
 
 export default function () {
-  const res=http.get('http://localhost:5000/api/url/aNtreSV');
+  const url = __ENV.LOAD_TEST_URL;
+  if (!url) {
+     throw new Error("LOAD_TEST_URL is not set"); 
+  }
+  const res=http.get(url);
   if (res.status !== 200 && res.status !== 302) {
     console.log(`FAILED ${res.status}: ${res.body}`);
     console.log(`Headers: ${JSON.stringify(res.headers)}`);
