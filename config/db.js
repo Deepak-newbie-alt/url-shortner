@@ -1,6 +1,17 @@
 require("dotenv").config();
-
+const fs = require("fs");
 const cassandra = require("cassandra-driver");
+
+let scbPath = process.env.SCB_PATH;
+
+if (process.env.ASTRA_SCB_BASE64) {
+    scbPath = "/tmp/secure-connect-tinyurl.zip";
+
+    fs.writeFileSync(
+        scbPath,
+        Buffer.from(process.env.ASTRA_SCB_BASE64, "base64")
+    );
+}
 
 const authProvider = new cassandra.auth.PlainTextAuthProvider(
     "token",
@@ -9,8 +20,7 @@ const authProvider = new cassandra.auth.PlainTextAuthProvider(
 
 const client = new cassandra.Client({
     cloud: {
-        secureConnectBundle:
-            process.env.SCB_PATH
+        secureConnectBundle: scbPath
     },
     authProvider,
     keyspace: "tinyurl"
