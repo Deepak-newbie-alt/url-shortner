@@ -10,7 +10,7 @@ const {ApiResponse}=require("../utils/ApiResponse");
 
 const generateShortCode=catchAsync(async(req,res)=>{
     const {originalUrl}=req.body;
-    const userId=req.userId;
+    const userId=req.user.userId;
 
     const createdUrl=await generateShortUrl(userId,originalUrl);
 
@@ -28,7 +28,7 @@ const getUrl=catchAsync(async(req,res)=>{
 
 const deleteUrl=catchAsync(async(req,res)=>{
     const {shortCode}=req.params;
-    const userId=req.userId;
+    const userId=req.user.userId;
 
     await deleteUrlFromDB(shortCode,userId);
 
@@ -38,7 +38,7 @@ const deleteUrl=catchAsync(async(req,res)=>{
 })
 
 const getUrlsOfUser = catchAsync(async (req, res) => {
-    const urls = await getUrls(req.userId);
+    const urls = await getUrls(req.user.userId);
 
     return res.status(200).json(
         new ApiResponse(200, urls, "URLs fetched successfully")

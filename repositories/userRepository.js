@@ -58,4 +58,33 @@ async function loginUser(email, password) {
     };
 }
 
-module.exports={registerUser,loginUser};
+async function findUserByEmail(email){
+    const start=performance.now();
+    const query='SELECT refresh_token FROM users WHERE email=?';
+    const params=[email];
+
+    const result=await client.execute(
+        query,
+        params,
+        {prepare:true}
+    )
+
+    recordDbDuration(performance.now()-start);
+    return result.rowLength>0?result.rows[0]:null;
+}
+
+async function setRefreshToken(email,refreshToken){
+    const start=performance.now();
+    const query=`UPDATE users
+                SET refresh_token=?
+                WHERE email=?`;
+    const params=[refreshToken,email];
+    await client.execute(
+        query,
+        params,
+        {prepare:true}
+    )
+    recordDbDuration(performance.now()-start);
+}
+
+module.exports={registerUser,loginUser,findUserByEmail,setRefreshToken};

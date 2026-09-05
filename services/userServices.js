@@ -1,8 +1,9 @@
-const {registerUser,loginUser}=require("../repositories/userRepository");
+const {registerUser,loginUser,findUserByEmail,setRefreshToken}=require("../repositories/userRepository");
 const {generateTokens}=require("../utils/generateTokens");
 
 const bcrypt=require("bcrypt");
-const {ApiResponse}=require("../utils/ApiResponse");
+const jwt=require("jsonwebtoken");
+const {ApiError}=require("../utils/ApiError");
 const {logger}=require("../observability/logger");
 
 const executeRegisterUser=async(email,password)=>{
@@ -19,9 +20,7 @@ const executeRegisterUser=async(email,password)=>{
             status:409,
             message:"User already exists"
         })
-        return res.status(409).json(
-            new ApiResponse(409,"User already exists")
-        )
+        throw new ApiError(409,"User already exists");
     }
 
     logger.info("user_registered",{
@@ -43,14 +42,14 @@ const executeLoginUser=async(email,password)=>{
             status:401,
             message:"Invalid credentials"
         })
-        return res.status(401).json(
-            new ApiResponse(401,"Invalid credentials")
-        )
+        throw new ApiError(401,"Invalid credentials");
     }
 
     const userId=result.userId;
 
-    const {accessToken,refreshToken}=generateTokens(userId);
+    const {accessToken,refreshToken}=generateTokens(userId,email);
+
+    await setRefreshToken(email,refreshToken);
     const data={
         userId,
         accessToken,
@@ -66,8 +65,48 @@ const executeLoginUser=async(email,password)=>{
     return data;
 }
 
+const executeRotateToken=async(incomingRefreshToken)=>{
+    logger.info("token_rotation_attempt",{
+        incomingRefreshToken
+    })
+    if(!incomingRefreshToken){
+        logger.error("refresh_token_missing",{
+            message:"Refresh token is missing",
+            status:401
+        })
+        throw new ApiError(401,"Refresh Token is required");
+    }
+    const decoded=jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET);
+    const user=decoded.user;
+
+    const isUser=await findUserByEmail(user.email);
+
+    if(!isUser || incomingRefreshToken!==isUser.refresh_token){
+        logger.error("invalid_refresh_token",{
+            message:"Invaild token or missing user",
+            status:403
+        })
+        throw new ApiError(403,"Invalid Refresh token");
+    }
+
+
+    const {accessToken,refreshToken}=generateTokens(user.userId,user.email);
+    await setRefreshToken(user.email,refreshToken);
+
+    const data={
+        accessToken,
+        refreshToken
+    }
+    logger.info("token_rotated_successfully",{
+        userId:user.userId,
+        message:"Token rotated successfully"
+    })
+    return data;
+}
+
 
 module.exports={
     executeRegisterUser,
-    executeLoginUser
+    executeLoginUser,
+    executeRotateToken
 }

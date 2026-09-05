@@ -1,5 +1,5 @@
 const {catchAsync}=require("../utils/catchAsync");
-const {executeRegisterUser,executeLoginUser}=require("../services/userServices");
+const {executeRegisterUser,executeLoginUser,executeRotateToken}=require("../services/userServices");
 
 const {ApiResponse}=require("../utils/ApiResponse");
 
@@ -31,7 +31,21 @@ const login=catchAsync(async(req,res)=>{
     )
 })
 
+const rotateToken=catchAsync(async(req,res)=>{
+    const incomingRefreshToken=req.cookies?.refreshToken;
+
+    const tokens=await executeRotateToken(incomingRefreshToken);
+
+    return res.status(200)
+    .cookie("accessToken",tokens.accessToken,options)
+    .cookie("refreshToken",tokens.refreshToken,options)
+    .json(
+        new ApiResponse(200,tokens,'Token rotated successfully')
+    ) 
+})
+
 module.exports={
     register,
-    login
+    login,
+    rotateToken
 }

@@ -1,26 +1,34 @@
 const jwt=require("jsonwebtoken");
 
-const generateAccessToken=(userId)=>{
+const generateAccessToken=(userId,email)=>{
+    const user={
+        userId,
+        email
+    }
     const accessToken=jwt.sign(
-        {userId},
+        {user},
         process.env.ACCESS_TOKEN_SECRET,
         {expiresIn:"15m"}
     )
     return accessToken;
 }
 
-const generateRefreshToken=(userId)=>{
+const generateRefreshToken=(userId,email)=>{
+    const user={
+        userId,
+        email
+    }
     const refreshToken=jwt.sign(
-        {userId},
+        {user},
         process.env.REFRESH_TOKEN_SECRET,
         {expiresIn:"7d"}
     )
     return refreshToken;
 }
 
-const generateTokens=(userId)=>{
-    const accessToken=generateAccessToken(userId);
-    const refreshToken=generateRefreshToken(userId);
+const generateTokens=(userId,email)=>{
+    const accessToken=generateAccessToken(userId,email);
+    const refreshToken=generateRefreshToken(userId,email);
 
     return {accessToken,refreshToken};
 }

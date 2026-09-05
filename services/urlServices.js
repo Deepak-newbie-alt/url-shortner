@@ -22,7 +22,10 @@ const generateShortUrl=async(userId,originalUrl)=>{
         logger.info("url_generation_cache_hit",{
             url:sanitizeUrl(originalUrl)
         })
-        return cachedUrl;
+        throw new ApiError(409,{
+            shortUrl:cachedUrl,
+            message:"Url already exists"
+        })
     }
     logger.info("url_generation_cache_miss",{
             url:sanitizeUrl(originalUrl)
@@ -34,7 +37,10 @@ const generateShortUrl=async(userId,originalUrl)=>{
             url:sanitizeUrl(originalUrl)
         })
         await setRedisCache(originalUrl,existingShortUrl,15*60);
-        return existingShortUrl;
+        throw new ApiError(409,{
+            shortUrl:existingShortUrl,
+            message:"Url already exists"
+        })
     }
 
     const shortCode=nanoid(7);
