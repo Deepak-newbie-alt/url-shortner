@@ -10,8 +10,7 @@ const rateLimiterScript = fs.readFileSync(
 
 const customRateLimiter=(WINDOW_SIZE,MAX_REQ,NAME)=>async(req,res,next)=>{
 
-    console.log("Rate limiter middleware entered")
-    const clientIp= req.ip;
+    const clientIp=req.headers["true-client-ip"] || req.ip;;
     const redisKey= `rate-limit:${clientIp}:${NAME}`;
     const clientKey=`client-limit:${req.clientId}:${NAME}`;
 
@@ -57,7 +56,6 @@ const customRateLimiter=(WINDOW_SIZE,MAX_REQ,NAME)=>async(req,res,next)=>{
                 redisKeyToReset:redisKey,
                 violationKeyToReset:violationKey
             }
-            console.log("Rate limiter middleware exiting")
             return next();
         }
 
@@ -74,16 +72,13 @@ const customRateLimiter=(WINDOW_SIZE,MAX_REQ,NAME)=>async(req,res,next)=>{
         }
 
         if(status==="OK"){
-            console.log("Rate limiter middleware exiting")
             return next();
         }
 
         console.error("Unexpected result:",result);
-        console.log("Rate limiter middleware exiting")
         return next();
     }catch(err){
         console.error("Redis error:",err);
-        console.log("Rate limiter middleware exiting")
         return next();
     }
 }
