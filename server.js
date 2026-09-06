@@ -14,6 +14,21 @@ app.use(express.json({limit:"10kb"}));
 app.use(cookieParser());
 app.use(requestIdMiddleware);
 app.use(requestMetricMiddleware);
+
+//Testing proxy IP
+app.use((req, res, next) => {
+    console.log({
+        remoteAddress: req.socket.remoteAddress,
+        xForwardedFor: req.headers["x-forwarded-for"],
+        trueClientIp: req.headers["true-client-ip"],
+        cfConnectingIp: req.headers["cf-connecting-ip"],
+        reqIp: req.ip
+    });
+
+    next();
+});
+
+
 app.use("/api/url",urlRoutes);
 app.use("/api/user",userRoutes);
 
