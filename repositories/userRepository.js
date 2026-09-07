@@ -87,4 +87,19 @@ async function setRefreshToken(email,refreshToken){
     recordDbDuration(performance.now()-start);
 }
 
-module.exports={registerUser,loginUser,findUserByEmail,setRefreshToken};
+async function unsetRefreshToken(email){
+    const start=performance.now();
+    const query=`UPDATE users
+                SET refresh_token=?
+                WHERE email=?`;
+    const params=[null,email];
+
+    await client.execute(
+        query,
+        params,
+        {prepare:true}
+    )
+    recordDbDuration(performance.now()-start);
+}
+
+module.exports={registerUser,loginUser,findUserByEmail,setRefreshToken,unsetRefreshToken};

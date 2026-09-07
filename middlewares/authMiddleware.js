@@ -10,7 +10,7 @@ const auth=catchAsync(async(req,res,next)=>{
             new ApiResponse(401,"Authentication failed: Token not found")
         )
     }
-
+    
     const decoded=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
 
     req.user=decoded.user;

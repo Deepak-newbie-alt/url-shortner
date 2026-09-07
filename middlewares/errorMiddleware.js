@@ -2,7 +2,6 @@ const {ZodError}=require("zod");
 const {ApiResponse}=require("../utils/ApiResponse");
 
 const errorMiddleware=(err,req,res,next)=>{
-
     if(err instanceof ZodError){
         return res.status(400).json(
             new ApiResponse(400,{

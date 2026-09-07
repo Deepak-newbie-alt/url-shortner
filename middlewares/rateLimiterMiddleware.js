@@ -10,9 +10,9 @@ const rateLimiterScript = fs.readFileSync(
 
 const customRateLimiter=(WINDOW_SIZE,MAX_REQ,NAME)=>async(req,res,next)=>{
 
-    const clientIp=req.headers["true-client-ip"] || req.ip;;
+    const clientIp=req.headers["true-client-ip"] || req.ip;
     const redisKey= `rate-limit:${clientIp}:${NAME}`;
-    const clientKey=`client-limit:${req.clientId}:${NAME}`;
+    const clientKey=req.user?`rate-limit:${req.user.userId}` : `client-limit:${req.clientId}:${NAME}`;
 
     const abuseKey=`abuse-limit:${clientIp}:${NAME}`;
     const violationKey=`violation:${clientIp}:${NAME}`;

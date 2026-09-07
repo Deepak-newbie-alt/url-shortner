@@ -1,4 +1,4 @@
-const {registerUser,loginUser,findUserByEmail,setRefreshToken}=require("../repositories/userRepository");
+const {registerUser,loginUser,findUserByEmail,setRefreshToken, unsetRefreshToken}=require("../repositories/userRepository");
 const {generateTokens}=require("../utils/generateTokens");
 
 const bcrypt=require("bcrypt");
@@ -66,9 +66,7 @@ const executeLoginUser=async(email,password)=>{
 }
 
 const executeRotateToken=async(incomingRefreshToken)=>{
-    logger.info("token_rotation_attempt",{
-        incomingRefreshToken
-    })
+    logger.info("token_rotation_attempt",{});
     if(!incomingRefreshToken){
         logger.error("refresh_token_missing",{
             message:"Refresh token is missing",
@@ -104,9 +102,21 @@ const executeRotateToken=async(incomingRefreshToken)=>{
     return data;
 }
 
+const executeLogoutUser=async(email)=>{
+    logger.info("logout_attempt_started",{
+        email
+    })
+    await unsetRefreshToken(email);
+
+    logger.info("logout_attempt_succeded",{
+        email
+    })
+}
+
 
 module.exports={
     executeRegisterUser,
     executeLoginUser,
-    executeRotateToken
+    executeRotateToken,
+    executeLogoutUser
 }
